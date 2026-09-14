@@ -3,21 +3,17 @@ import type { NextConfig } from "next";
 /**
  * Studio Mashariki - Next.js configuration
  *
- * Hosting target: Firebase Hosting.
+ * Do not use `output: "export"`: Clerk, generateMetadata, and Convex
+ * server reads all need a Node server.
  *
- * We deliberately use `output: "standalone"` rather than `output: "export"`.
- * A static export cannot run this app because it depends on server-rendered
- * behaviour that must execute per request:
- *   - Clerk authentication on /dashboard
- *   - `generateMetadata` + per-gallery JSON-LD on /galleries/[id]
- *   - Convex server-side reads for freshly created galleries
- *
- * `standalone` emits a self-contained server bundle in `.next/standalone`,
- * which Firebase serves through a Cloud Function / Cloud Run backend while
- * static assets are served from the Firebase CDN. See `firebase.json`.
+ * `standalone` is for Docker / Firebase / self-hosting. On Vercel it must
+ * stay off: Next.js 16.3 plus Vercel's adapter skips writing
+ * `.next/next-server.js.nft.json`, then `onBuildComplete` crashes with ENOENT
+ * (https://github.com/vercel/next.js/issues/96646). Vercel ignores the
+ * standalone folder anyway.
  */
 const nextConfig: NextConfig = {
-  output: "standalone",
+  ...(process.env.VERCEL ? {} : { output: "standalone" as const }),
 
   // Surface type errors at build time instead of silently shipping.
   // Note: Next.js 16 removed the `eslint` key from next.config; linting is run
