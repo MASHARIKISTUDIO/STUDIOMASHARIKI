@@ -8,10 +8,13 @@
  * @module
  */
 
+import type * as booking from "../booking.js";
 import type * as categories from "../categories.js";
 import type * as galleries from "../galleries.js";
 import type * as http from "../http.js";
+import type * as media from "../media.js";
 import type * as migrations from "../migrations.js";
+import type * as model_booking from "../model/booking.js";
 import type * as model_users from "../model/users.js";
 import type * as seed from "../seed.js";
 import type * as uploads from "../uploads.js";
@@ -24,10 +27,13 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  booking: typeof booking;
   categories: typeof categories;
   galleries: typeof galleries;
   http: typeof http;
+  media: typeof media;
   migrations: typeof migrations;
+  "model/booking": typeof model_booking;
   "model/users": typeof model_users;
   seed: typeof seed;
   uploads: typeof uploads;

@@ -2,6 +2,10 @@ import Image from "next/image";
 import { BookNowButton, BookSessionCta } from "@/components/booking/book-now-button";
 import { BookingModal } from "@/components/booking/booking-modal";
 import { BookingProvider } from "@/components/booking/booking-provider";
+import {
+  nairobiDateString,
+  nairobiMinutesFromMidnight,
+} from "@/lib/booking";
 import type { ServicePageContent } from "@/lib/service-pages";
 import { SectionLabel } from "./shared";
 
@@ -12,6 +16,12 @@ export function BookingLayout({ page }: { page: ServicePageContent }) {
     title: offer.title,
     price: offer.price,
   }));
+  // Request-time snapshot so the calendar can hide past hours. The mutation
+  // still re-checks on the server, so a slightly stale snapshot cannot book.
+  // eslint-disable-next-line react-hooks/purity -- server snapshot, not a render tick
+  const now = Date.now();
+  const today = nairobiDateString(now);
+  const nowMinutes = nairobiMinutesFromMidnight(now);
 
   return (
     <BookingProvider>
@@ -88,7 +98,7 @@ export function BookingLayout({ page }: { page: ServicePageContent }) {
         </div>
       </section>
 
-      <BookingModal products={products} />
+      <BookingModal products={products} today={today} nowMinutes={nowMinutes} />
     </BookingProvider>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery } from "convex/react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { convex } from "@/app/providers";
 import { SessionCalendar, type SlotKind } from "@/components/booking/session-calendar";
@@ -15,11 +15,16 @@ import {
   formatLongDate,
   monthDateRange,
   monthFromDate,
-  nairobiDateString,
   slotRangeLabel,
 } from "@/lib/booking";
 
-export function AvailabilityBoard() {
+export function AvailabilityBoard({
+  today,
+  nowMinutes,
+}: {
+  today: string;
+  nowMinutes: number;
+}) {
   if (!convex) {
     return (
       <p className="text-sm text-gray-400">
@@ -27,12 +32,18 @@ export function AvailabilityBoard() {
       </p>
     );
   }
-  return <AvailabilityBoardConnected />;
+  return (
+    <AvailabilityBoardConnected today={today} nowMinutes={nowMinutes} />
+  );
 }
 
-function AvailabilityBoardConnected() {
-  const nowMs = useNow();
-  const today = nairobiDateString(nowMs);
+function AvailabilityBoardConnected({
+  today,
+  nowMinutes,
+}: {
+  today: string;
+  nowMinutes: number;
+}) {
   const [{ year, monthIndex }, setMonth] = useState(() => monthFromDate(today));
   const range = monthDateRange(year, monthIndex);
   const schedule = useQuery(api.booking.listAdminSchedule, range);
@@ -42,14 +53,9 @@ function AvailabilityBoardConnected() {
   const setWhatsappNumber = useMutation(api.booking.setWhatsappNumber);
 
   const [date, setDate] = useState<string | null>(null);
-  const [whatsapp, setWhatsapp] = useState("");
+  const [whatsappDraft, setWhatsappDraft] = useState<string | null>(null);
   const [savingNumber, setSavingNumber] = useState(false);
-
-  useEffect(() => {
-    if (schedule?.whatsappNumber) {
-      setWhatsapp(schedule.whatsappNumber);
-    }
-  }, [schedule?.whatsappNumber]);
+  const whatsapp = whatsappDraft ?? schedule?.whatsappNumber ?? "";
 
   const occupied = useMemo(() => {
     const keys = new Set<string>();
@@ -147,7 +153,7 @@ function AvailabilityBoardConnected() {
             autoComplete="tel"
             placeholder="2547XXXXXXXX"
             value={whatsapp}
-            onChange={(event) => setWhatsapp(event.target.value)}
+            onChange={(event) => setWhatsappDraft(event.target.value)}
           />
           <Button type="submit" disabled={savingNumber}>
             Save number
@@ -193,7 +199,9 @@ function AvailabilityBoardConnected() {
           occupiedKind={(slotDate, startMinutes) =>
             kindByKey.get(`${slotDate}:${startMinutes}`) ?? "busy"
           }
-          nowMs={nowMs}
+          today={today}
+          nowMinutes={nowMinutes}
+          timesPending={schedule === undefined}
           slotHint={
             date
               ? `Editing ${formatLongDate(date)}`
@@ -246,13 +254,4 @@ function AvailabilityBoardConnected() {
       </section>
     </div>
   );
-}
-
-function useNow(): number {
-  const [now, setNow] = useState(Date.now());
-  useEffect(() => {
-    const id = window.setInterval(() => setNow(Date.now()), 30_000);
-    return () => window.clearInterval(id);
-  }, []);
-  return now;
 }

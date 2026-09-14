@@ -7,10 +7,7 @@ import {
   latestBookableDate,
   listSessionSlots,
   monthGrid,
-  nairobiDateString,
-  nairobiMinutesFromMidnight,
   shiftMonth,
-  slotStartUtcMs,
   WEEKDAY_LABELS,
 } from "@/lib/booking";
 import { studio } from "@/lib/studio";
@@ -21,24 +18,21 @@ export type SlotKind = "available" | "busy" | "booked" | "past" | "selected";
 export function slotOccupancy(args: {
   date: string;
   startMinutes: number;
-  nowMs: number;
+  today: string;
+  nowMinutes: number;
   occupied: ReadonlySet<string>;
   kindForOccupied?: SlotKind;
 }): SlotKind | "closed" {
   if (!isStudioOpenDate(args.date)) {
     return "closed";
   }
-  const today = nairobiDateString(args.nowMs);
-  if (args.date < today) {
+  if (args.date < args.today) {
     return "past";
   }
-  if (args.date === today && args.startMinutes <= nairobiMinutesFromMidnight(args.nowMs)) {
+  if (args.date === args.today && args.startMinutes <= args.nowMinutes) {
     return "past";
   }
-  if (args.date > latestBookableDate(args.nowMs)) {
-    return "past";
-  }
-  if (slotStartUtcMs(args.date, args.startMinutes) <= args.nowMs) {
+  if (args.date > latestBookableDate(args.today)) {
     return "past";
   }
   if (args.occupied.has(`${args.date}:${args.startMinutes}`)) {
@@ -57,7 +51,8 @@ export function SessionCalendar({
   onSelectSlot,
   occupied,
   occupiedKind,
-  nowMs,
+  today,
+  nowMinutes,
   slotHint,
   timesPending = false,
 }: {
@@ -70,12 +65,12 @@ export function SessionCalendar({
   onSelectSlot: (startMinutes: number) => void;
   occupied: ReadonlySet<string>;
   occupiedKind?: (date: string, startMinutes: number) => SlotKind;
-  nowMs: number;
+  today: string;
+  nowMinutes: number;
   slotHint?: string;
   timesPending?: boolean;
 }) {
-  const today = nairobiDateString(nowMs);
-  const latest = latestBookableDate(nowMs);
+  const latest = latestBookableDate(today);
   const cells = monthGrid(year, monthIndex);
   const prev = shiftMonth(year, monthIndex, -1);
   const next = shiftMonth(year, monthIndex, 1);
@@ -172,7 +167,8 @@ export function SessionCalendar({
                   : slotOccupancy({
                       date: selectedDate,
                       startMinutes: slot.startMinutes,
-                      nowMs,
+                      today,
+                      nowMinutes,
                       occupied,
                     });
             const selected =
@@ -206,9 +202,11 @@ export function SessionCalendar({
                         ? "Booked"
                         : kind === "busy"
                           ? "Busy"
-                          : kind === "past"
-                            ? "Passed"
-                            : "Unavailable"}
+                          : selectedDate === null || timesPending
+                            ? slot.endLabel
+                            : kind === "past"
+                              ? "Passed"
+                              : "Unavailable"}
                   </span>
                 </button>
               </li>

@@ -7,9 +7,18 @@ import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
 
 export function DashboardOverview() {
-  const me = useQuery(api.users.current, convex ? {} : "skip");
-  const isAdmin = me?.role === "admin";
+  if (!convex) {
+    return <OverviewCopy isAdmin={false} />;
+  }
+  return <DashboardOverviewConnected />;
+}
 
+function DashboardOverviewConnected() {
+  const me = useQuery(api.users.current);
+  return <OverviewCopy isAdmin={me?.role === "admin"} />;
+}
+
+function OverviewCopy({ isAdmin }: { isAdmin: boolean }) {
   return (
     <div className="rounded-xl border border-white/10 bg-gray-900/40 p-6">
       <h1 className="text-xl font-bold text-white">Dashboard</h1>

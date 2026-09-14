@@ -6,6 +6,8 @@ import { serviceUrl, siteConfig } from "@/lib/site";
 
 const page = getServicePage("book-a-session");
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: page?.title ?? "Book a Session",
   description: page?.seoDescription,

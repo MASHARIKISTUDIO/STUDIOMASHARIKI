@@ -3,7 +3,6 @@ import {
   formatLongDate,
   formatMinutes,
   MAX_ADVANCE_DAYS,
-  nairobiDateString,
   parseDateParts,
   SLOT_DURATION_MINUTES,
 } from "@/convex/model/booking";
@@ -116,8 +115,8 @@ export function appointmentSummary(args: {
   return `${args.title} · ${formatLongDate(args.date)} · ${slotRangeLabel(args.startMinutes)}`;
 }
 
-export function latestBookableDate(nowMs: number): string {
-  return addDays(nairobiDateString(nowMs), MAX_ADVANCE_DAYS);
+export function latestBookableDate(today: string): string {
+  return addDays(today, MAX_ADVANCE_DAYS);
 }
 
 function toDateString(year: number, monthIndex: number, day: number): string {

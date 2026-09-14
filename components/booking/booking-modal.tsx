@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from "convex/react";
 import { ArrowRight } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { convex } from "@/app/providers";
 import { cyanPillClassName } from "@/components/service-pages/shared";
@@ -22,7 +22,6 @@ import {
   formatLongDate,
   monthDateRange,
   monthFromDate,
-  nairobiDateString,
   slotRangeLabel,
 } from "@/lib/booking";
 import { cn } from "@/lib/utils";
@@ -31,7 +30,15 @@ import { SessionCalendar } from "./session-calendar";
 
 const envWhatsapp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "";
 
-export function BookingModal({ products }: { products: CalendarProduct[] }) {
+export function BookingModal({
+  products,
+  today,
+  nowMinutes,
+}: {
+  products: CalendarProduct[];
+  today: string;
+  nowMinutes: number;
+}) {
   const { open, close, product } = useBookingModal();
 
   return (
@@ -44,13 +51,22 @@ export function BookingModal({ products }: { products: CalendarProduct[] }) {
           </DialogDescription>
         </DialogHeader>
         {convex ? (
-          <ConnectedBookingForm products={products} selectedProduct={product} />
+          <ConnectedBookingForm
+            key={product?.id ?? "any"}
+            products={products}
+            selectedProduct={product}
+            today={today}
+            nowMinutes={nowMinutes}
+          />
         ) : (
           <BookingForm
+            key={product?.id ?? "any"}
             products={products}
             selectedProduct={product}
             occupied={new Set()}
             whatsappConfigured={envWhatsapp.length >= 10}
+            today={today}
+            nowMinutes={nowMinutes}
             onRequest={null}
           />
         )}
@@ -62,12 +78,14 @@ export function BookingModal({ products }: { products: CalendarProduct[] }) {
 function ConnectedBookingForm({
   products,
   selectedProduct,
+  today,
+  nowMinutes,
 }: {
   products: CalendarProduct[];
   selectedProduct: CalendarProduct | null;
+  today: string;
+  nowMinutes: number;
 }) {
-  const nowMs = useNow();
-  const today = nairobiDateString(nowMs);
   const [{ year, monthIndex }, setMonth] = useState(() => monthFromDate(today));
   const range = monthDateRange(year, monthIndex);
   const occupiedRows = useQuery(api.booking.listOccupiedSlots, range);
@@ -87,13 +105,17 @@ function ConnectedBookingForm({
       products={products}
       selectedProduct={selectedProduct}
       occupied={occupied}
-      whatsappConfigured={contact?.whatsappConfigured === true || envWhatsapp.length >= 10}
+      whatsappConfigured={
+        contact?.whatsappConfigured === true || envWhatsapp.length >= 10
+      }
       year={year}
       monthIndex={monthIndex}
       onMonthChange={(nextYear, nextMonth) =>
         setMonth({ year: nextYear, monthIndex: nextMonth })
       }
-      nowMs={nowMs}
+      today={today}
+      nowMinutes={nowMinutes}
+      timesPending={occupiedRows === undefined}
       onRequest={async (args) => {
         const result = await requestAppointment(args);
         const fallbackUrl =
@@ -115,7 +137,9 @@ function BookingForm({
   year,
   monthIndex,
   onMonthChange,
-  nowMs,
+  today,
+  nowMinutes,
+  timesPending = false,
   onRequest,
 }: {
   products: CalendarProduct[];
@@ -125,7 +149,9 @@ function BookingForm({
   year?: number;
   monthIndex?: number;
   onMonthChange?: (year: number, monthIndex: number) => void;
-  nowMs?: number;
+  today: string;
+  nowMinutes: number;
+  timesPending?: boolean;
   onRequest:
     | ((args: {
         productId: CalendarProduct["id"];
@@ -135,8 +161,6 @@ function BookingForm({
       }) => Promise<{ message: string; whatsappUrl: string | null }>)
     | null;
 }) {
-  const clock = useNow(nowMs);
-  const today = nairobiDateString(clock);
   const initialMonth = monthFromDate(today);
   const [month, setMonth] = useState(initialMonth);
   const [productId, setProductId] = useState<CalendarProduct["id"] | null>(
@@ -147,14 +171,10 @@ function BookingForm({
   const [name, setName] = useState("");
   const [sending, setSending] = useState(false);
 
-  useEffect(() => {
-    setProductId(selectedProduct?.id ?? null);
-    setStartMinutes(null);
-  }, [selectedProduct]);
-
   const visibleYear = year ?? month.year;
   const visibleMonth = monthIndex ?? month.monthIndex;
-  const product = products.find((item) => item.id === productId) ?? selectedProduct;
+  const product =
+    products.find((item) => item.id === productId) ?? selectedProduct;
 
   async function send() {
     if (product === null || date === null || startMinutes === null) {
@@ -183,12 +203,10 @@ function BookingForm({
           `Service: ${product.title} (${product.price})`,
           `Date: ${formatLongDate(date)}`,
           `Time: ${slotRangeLabel(startMinutes)} (EAT)`,
-          customerName ? `Name: ${customerName}` : "",
+          ...(customerName ? [`Name: ${customerName}`] : []),
           "",
           "Please confirm. Thanks!",
-        ]
-          .filter((line, index, lines) => line !== "" || lines[index - 1] !== "")
-          .join("\n");
+        ].join("\n");
         const digits = envWhatsapp.replace(/\D/g, "");
         url =
           digits.length >= 10
@@ -200,11 +218,19 @@ function BookingForm({
         window.open(url, "_blank", "noopener,noreferrer");
         toast.success("Opening WhatsApp with your appointment.");
       } else {
-        await navigator.clipboard.writeText(message);
-        toast.success("Appointment copied. WhatsApp is not configured yet.");
+        try {
+          await navigator.clipboard.writeText(message);
+          toast.success("Appointment copied. WhatsApp is not configured yet.");
+        } catch {
+          toast.success(
+            "Appointment saved. Add a WhatsApp number in Session hours to send it automatically.",
+          );
+        }
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not book that time.");
+      toast.error(
+        error instanceof Error ? error.message : "Could not book that time.",
+      );
     } finally {
       setSending(false);
     }
@@ -238,7 +264,9 @@ function BookingForm({
                 <span className="block text-sm font-semibold uppercase tracking-[0.08em]">
                   {item.title}
                 </span>
-                <span className="mt-0.5 block text-xs text-cyan-400">{item.price}</span>
+                <span className="mt-0.5 block text-xs text-cyan-400">
+                  {item.price}
+                </span>
               </button>
             );
           })}
@@ -262,7 +290,10 @@ function BookingForm({
         selectedMinutes={startMinutes}
         onSelectSlot={setStartMinutes}
         occupied={occupied}
-        timesPending={occupiedRows === undefined}
+        today={today}
+        nowMinutes={nowMinutes}
+        timesPending={timesPending}
+        slotHint="Grey hours are busy or already taken."
       />
 
       <div className="grid gap-2">
@@ -291,10 +322,7 @@ function BookingForm({
         <button
           type="button"
           disabled={
-            product === null ||
-            date === null ||
-            startMinutes === null ||
-            sending
+            product === null || date === null || startMinutes === null || sending
           }
           onClick={() => void send()}
           className={cn(cyanPillClassName, "justify-center")}
@@ -305,14 +333,4 @@ function BookingForm({
       </div>
     </div>
   );
-}
-
-function useNow(serverNow?: number): number {
-  const [now, setNow] = useState(serverNow ?? Date.now());
-  useEffect(() => {
-    setNow(Date.now());
-    const id = window.setInterval(() => setNow(Date.now()), 30_000);
-    return () => window.clearInterval(id);
-  }, []);
-  return now;
 }

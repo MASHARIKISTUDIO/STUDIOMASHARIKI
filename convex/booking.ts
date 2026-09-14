@@ -418,10 +418,24 @@ export const setWhatsappNumber = mutation({
       return null;
     }
 
-    const { _id, _creationTime, whatsappNumber: _cleared, ...rest } =
-      existing;
     await ctx.db.replace("site_settings", existing._id, {
-      ...rest,
+      key: existing.key,
+      ...(existing.heroTitle !== undefined ? { heroTitle: existing.heroTitle } : {}),
+      ...(existing.heroSubtitle !== undefined
+        ? { heroSubtitle: existing.heroSubtitle }
+        : {}),
+      ...(existing.heroImageUrl !== undefined
+        ? { heroImageUrl: existing.heroImageUrl }
+        : {}),
+      ...(existing.heroCtaLabel !== undefined
+        ? { heroCtaLabel: existing.heroCtaLabel }
+        : {}),
+      ...(existing.heroCtaHref !== undefined
+        ? { heroCtaHref: existing.heroCtaHref }
+        : {}),
+      ...(existing.defaultPriceKes !== undefined
+        ? { defaultPriceKes: existing.defaultPriceKes }
+        : {}),
       updatedAt: now,
       updatedBy: admin._id,
     });
