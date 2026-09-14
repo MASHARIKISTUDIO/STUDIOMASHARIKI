@@ -1,0 +1,219 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  /* Enables `font-script`, used only for the header's motto flourish. */
+  --font-script: var(--font-script);
+  /* Brush titles on service landing pages (`font-display`). */
+  --font-display: var(--font-display);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/**
+ * Studio Mashariki black-and-blue theme.
+ *
+ * The near-blacks are Tailwind's `gray-950`/`gray-900`, which carry a slight
+ * blue cast (hue 262-265) rather than being pure neutral. That is deliberate:
+ * against a true `#000` the blue accent reads as a detached glow, while a
+ * blue-tinted black makes the whole surface feel of one piece.
+ *
+ * Values are the oklch equivalents of real Tailwind palette entries, so a token
+ * and its raw utility (`bg-blue-600`) render identically and can be mixed:
+ *
+ *   --background      gray-950   --card       gray-900
+ *   --foreground      gray-50    --muted-fg   gray-400
+ *   --primary         blue-600   --accent     blue-950
+ *   --ring            blue-500   --border     white/10
+ *
+ * Contrast, verified for WCAG 2.1 AA normal text:
+ *   gray-50 on gray-950 ....... ~17.4:1  (AAA)
+ *   gray-400 on gray-950 ...... ~7.3:1   (AAA) - secondary copy
+ *   white on blue-600 ......... ~5.2:1   (AA)  - primary buttons
+ *   blue-400 on gray-950 ...... ~7.0:1   (AAA) - links and accents
+ *
+ * Note on the primary: blue-500 would look livelier on black but gives only
+ * ~3.7:1 with white text, which fails AA at body size. blue-600 is the brightest
+ * blue that still passes, so it is what buttons use. blue-400 is reserved for
+ * TEXT on the dark background, where the contrast direction is reversed.
+ */
+:root {
+  --background: oklch(0.13 0.028 261.692);
+  --foreground: oklch(0.985 0.002 247.839);
+  --card: oklch(0.21 0.034 264.665);
+  --card-foreground: oklch(0.985 0.002 247.839);
+  --popover: oklch(0.21 0.034 264.665);
+  --popover-foreground: oklch(0.985 0.002 247.839);
+
+  /* blue-600 / white - the only pairing used for solid buttons. */
+  --primary: oklch(0.546 0.245 262.881);
+  --primary-foreground: oklch(1 0 0);
+
+  /* gray-900 surface for quiet secondary actions. */
+  --secondary: oklch(0.21 0.034 264.665);
+  --secondary-foreground: oklch(0.985 0.002 247.839);
+
+  /* gray-900 / gray-400 */
+  --muted: oklch(0.21 0.034 264.665);
+  --muted-foreground: oklch(0.707 0.022 261.325);
+
+  /* blue-950: a tinted hover/active wash that stays legible on black. */
+  --accent: oklch(0.282 0.091 267.935);
+  --accent-foreground: oklch(0.809 0.105 251.813);
+
+  --destructive: oklch(0.704 0.191 22.216);
+
+  /* Hairline borders as translucent white, so they sit on any dark surface. */
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  /* blue-500 focus ring: bright enough to spot against near-black. */
+  --ring: oklch(0.623 0.214 259.815);
+
+  /* Sequential blues for the revenue chart (Step 5), bright to deep. */
+  --chart-1: oklch(0.707 0.165 254.624);
+  --chart-2: oklch(0.623 0.214 259.815);
+  --chart-3: oklch(0.546 0.245 262.881);
+  --chart-4: oklch(0.746 0.16 232.661);
+  --chart-5: oklch(0.828 0.111 230.318);
+
+  /* 0.75rem: `rounded-xl` on cards, `rounded-lg` on controls. */
+  --radius: 0.75rem;
+
+  --sidebar: oklch(0.21 0.034 264.665);
+  --sidebar-foreground: oklch(0.985 0.002 247.839);
+  --sidebar-primary: oklch(0.546 0.245 262.881);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.282 0.091 267.935);
+  --sidebar-accent-foreground: oklch(0.809 0.105 251.813);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.623 0.214 259.815);
+}
+
+/**
+ * `.dark` inherits `:root` rather than redefining it.
+ *
+ * The theme is dark by default, so there is no second palette to declare. The
+ * class is still applied on `<html>` (see `app/layout.tsx`) because the shadcn
+ * primitives ship `dark:` variants for borders and input fills that only take
+ * effect when it is present - without the class those controls would fall back
+ * to their light-surface treatment on a black background.
+ *
+ * Keeping this block empty of overrides means there is exactly ONE place to edit
+ * a colour. Do not paste a duplicate palette here.
+ */
+.dark {
+  color-scheme: dark;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+    /* Tabular-ish rendering for the money figures on the admin dashboard. */
+    font-variant-numeric: tabular-nums;
+  }
+  /* Headings carry the tighter tracking that makes the light theme feel
+     deliberate rather than default. */
+  h1,
+  h2,
+  h3 {
+    @apply tracking-tight text-balance;
+  }
+}
+
+/**
+ * Elevation on a black surface.
+ *
+ * A drop shadow is nearly invisible against near-black, so these combine a
+ * blue-tinted shadow for the cast with a faint inset top highlight - the latter
+ * is what actually reads as "raised" in a dark UI, by suggesting a light source
+ * catching the top edge of the card.
+ */
+@utility shadow-soft {
+  box-shadow:
+    inset 0 1px 0 0 oklch(1 0 0 / 0.04),
+    0 1px 2px 0 oklch(0 0 0 / 0.5);
+}
+
+@utility shadow-soft-md {
+  box-shadow:
+    inset 0 1px 0 0 oklch(1 0 0 / 0.06),
+    0 4px 12px -2px oklch(0 0 0 / 0.6);
+}
+
+@utility shadow-soft-lg {
+  box-shadow:
+    inset 0 1px 0 0 oklch(1 0 0 / 0.08),
+    0 12px 32px -8px oklch(0 0 0 / 0.7),
+    0 0 0 1px oklch(0.546 0.245 262.881 / 0.15);
+}
+
+/**
+ * Horizontal logo marquee.
+ *
+ * Translates exactly -50% across a list rendered TWICE, so the second copy is
+ * pixel-aligned with the first at the moment the animation loops and the seam is
+ * invisible. Any other distance produces a visible jump.
+ *
+ * `--marquee-duration` is set per-instance so speed can scale with the number of
+ * logos instead of being a magic number here.
+ */
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@utility animate-marquee {
+  animation: marquee-scroll var(--marquee-duration, 40s) linear infinite;
+}
