@@ -4,6 +4,7 @@ import { useAuth } from "@clerk/nextjs";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { createContext, useContext, type ReactNode } from "react";
+import { SiteBooking } from "@/components/booking/site-booking";
 
 const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
 
@@ -31,14 +32,15 @@ export function Providers({
   children: ReactNode;
   clerkConfigured: boolean;
 }) {
+  const withBooking = <SiteBooking>{children}</SiteBooking>;
   const tree = !convex ? (
-    <>{children}</>
+    withBooking
   ) : clerkConfigured ? (
     <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
-      {children}
+      {withBooking}
     </ConvexProviderWithClerk>
   ) : (
-    <ConvexProvider client={convex}>{children}</ConvexProvider>
+    <ConvexProvider client={convex}>{withBooking}</ConvexProvider>
   );
 
   return (

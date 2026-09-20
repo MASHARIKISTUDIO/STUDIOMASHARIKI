@@ -1,7 +1,8 @@
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import { BookableCard, BookSessionCta } from "@/components/booking/book-now-button";
 import type { ServicePageContent } from "@/lib/service-pages";
+import { bookingProductForService } from "@/lib/services";
 import { CyanCta, SectionLabel } from "./shared";
 
 export function PhotographyLayout({ page }: { page: ServicePageContent }) {
@@ -15,12 +16,9 @@ export function PhotographyLayout({ page }: { page: ServicePageContent }) {
           <SectionLabel>{page.offeringsHeading}</SectionLabel>
 
           <ul className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {offerings.map((item) => (
-              <li key={item.title}>
-                <Link
-                  href="#enquire"
-                  className="group relative flex h-full min-h-[11.5rem] flex-col overflow-hidden rounded-xl border border-cyan-400/25 bg-gray-950 shadow-[0_0_24px_-12px_rgba(34,211,238,0.45)] transition-colors hover:border-cyan-400/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400"
-                >
+            {offerings.map((item) => {
+              const inner = (
+                <>
                   {item.image !== undefined ? (
                     <Image
                       src={item.image}
@@ -54,9 +52,24 @@ export function PhotographyLayout({ page }: { page: ServicePageContent }) {
                       <ArrowRight className="size-3.5" />
                     </span>
                   </div>
-                </Link>
-              </li>
-            ))}
+                </>
+              );
+
+              const tileClass =
+                "group relative flex h-full min-h-[11.5rem] flex-col overflow-hidden rounded-xl border border-cyan-400/25 bg-gray-950 shadow-[0_0_24px_-12px_rgba(34,211,238,0.45)] transition-colors hover:border-cyan-400/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400";
+
+              return (
+                <li key={item.title}>
+                  {item.bookingProductId !== undefined ? (
+                    <BookableCard productId={item.bookingProductId} className={tileClass}>
+                      {inner}
+                    </BookableCard>
+                  ) : (
+                    <article className={tileClass}>{inner}</article>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </div>
       </section>
@@ -91,6 +104,8 @@ export function PhotographyLayout({ page }: { page: ServicePageContent }) {
 }
 
 export function CtaBanner({ page }: { page: ServicePageContent }) {
+  const product = bookingProductForService(page.slug);
+
   return (
     <section className="relative overflow-hidden border-b border-white/10">
       <div
@@ -106,7 +121,11 @@ export function CtaBanner({ page }: { page: ServicePageContent }) {
             <p className="mt-2 max-w-md text-sm text-gray-300">{page.cta.sub}</p>
           ) : null}
         </div>
-        <CyanCta href={page.cta.href}>{page.cta.label}</CyanCta>
+        {product !== undefined ? (
+          <BookSessionCta product={product}>{page.cta.label}</BookSessionCta>
+        ) : (
+          <CyanCta href={page.cta.href}>{page.cta.label}</CyanCta>
+        )}
       </div>
     </section>
   );

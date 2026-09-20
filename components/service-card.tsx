@@ -1,7 +1,8 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { BookNowButton, BookProductChip } from "@/components/booking/book-now-button";
 import { MediaThumb } from "@/components/media-thumb";
-import { CATEGORY_META } from "@/convex/categories";
+import { calendarProduct } from "@/lib/booking";
 import type { Service } from "@/lib/services";
 
 /**
@@ -12,8 +13,8 @@ import type { Service } from "@/lib/services";
  * Nested interactive elements are invalid HTML and unusable with a keyboard, so
  * the whole card is NOT one big anchor: the title is the primary link and it
  * carries a `::after` overlay that makes the card's empty space clickable, while
- * the category links sit above that overlay in the stacking order and stay
- * independently focusable.
+ * Book now and the category chips sit above that overlay in the stacking order
+ * and stay independently focusable.
  */
 export function ServiceCard({
   service,
@@ -22,6 +23,11 @@ export function ServiceCard({
   service: Service;
   imageSizes: string;
 }) {
+  const product =
+    service.bookingProductId !== undefined
+      ? calendarProduct(service.bookingProductId)
+      : undefined;
+
   return (
     <article className="group relative flex w-full flex-col overflow-hidden rounded-xl border border-white/10 bg-gray-900 shadow-soft transition-all duration-200 hover:border-blue-500/50 hover:shadow-soft-md">
       <div className="relative aspect-video w-full overflow-hidden bg-gray-950">
@@ -76,13 +82,12 @@ export function ServiceCard({
                     |
                   </span>
                 ) : null}
-                <Link
-                  href={`/categories/${link.category}`}
-                  title={CATEGORY_META[link.category].tagline}
-                  className="rounded transition-colors hover:text-blue-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+                <BookProductChip
+                  productId={link.bookingProductId}
+                  className="text-left"
                 >
                   {link.label}
-                </Link>
+                </BookProductChip>
               </li>
             ))}
           </ul>
@@ -90,7 +95,11 @@ export function ServiceCard({
 
         {/* `mt-auto` pins the arrow to the bottom of the tallest card in the row,
             so the buttons line up across a row of uneven copy lengths. */}
-        <div className="mt-auto flex justify-end pt-3">
+        <div className="relative z-10 mt-auto flex items-center justify-between gap-2 pt-3">
+          <BookNowButton
+            product={product}
+            className="px-3 py-1.5 text-[0.65rem]"
+          />
           <span
             aria-hidden="true"
             className="flex size-7 items-center justify-center rounded-full bg-blue-600 text-white transition-all duration-200 group-hover:bg-blue-500 group-hover:shadow-[0_0_16px_-2px_oklch(0.623_0.214_259.815/0.9)]"

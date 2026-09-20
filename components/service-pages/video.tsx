@@ -1,7 +1,9 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { BookableCard, BookSessionCta } from "@/components/booking/book-now-button";
 import type { ServicePageContent, VideoTier } from "@/lib/service-pages";
-import { CyanCta, SectionLabel } from "./shared";
+import { bookingProductForService } from "@/lib/services";
+import { SectionLabel } from "./shared";
 
 export function VideoLayout({ page }: { page: ServicePageContent }) {
   const tiers = page.videoTiers ?? [];
@@ -44,7 +46,9 @@ export function VideoLayout({ page }: { page: ServicePageContent }) {
             ))}
           </ol>
           <div className="mt-10 flex justify-end">
-            <CyanCta href={page.cta.href}>{page.cta.label}</CyanCta>
+            <BookSessionCta product={bookingProductForService(page.slug)}>
+              {page.cta.label}
+            </BookSessionCta>
           </div>
         </div>
       </section>
@@ -101,12 +105,9 @@ function VideoTierBlock({ tier }: { tier: VideoTier }) {
           id={`${tier.id}-grid`}
           className="grid gap-2 p-3 sm:grid-cols-2 lg:p-4"
         >
-          {tier.services.map((item) => (
-            <li key={`${tier.id}-${item.title}`}>
-              <Link
-                href={item.href}
-                className="group flex h-full items-start gap-3 rounded-xl border border-white/10 bg-gray-900/60 p-3 transition-colors hover:border-cyan-400/50 hover:bg-gray-900"
-              >
+          {tier.services.map((item) => {
+            const inner = (
+              <>
                 <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-cyan-400/30 text-cyan-400">
                   <item.icon className="size-4" aria-hidden="true" />
                 </span>
@@ -118,9 +119,23 @@ function VideoTierBlock({ tier }: { tier: VideoTier }) {
                     {item.text}
                   </span>
                 </span>
-              </Link>
-            </li>
-          ))}
+              </>
+            );
+            const tileClass =
+              "group flex h-full items-start gap-3 rounded-xl border border-white/10 bg-gray-900/60 p-3 transition-colors hover:border-cyan-400/50 hover:bg-gray-900";
+
+            return (
+              <li key={`${tier.id}-${item.title}`}>
+                {item.bookingProductId !== undefined ? (
+                  <BookableCard productId={item.bookingProductId} className={tileClass}>
+                    {inner}
+                  </BookableCard>
+                ) : (
+                  <article className={tileClass}>{inner}</article>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </div>
     </article>

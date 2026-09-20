@@ -143,15 +143,16 @@ function AvailabilityBoardConnected({
       >
         <Label htmlFor="whatsapp-number">WhatsApp number for bookings</Label>
         <p className="mt-1 text-xs text-gray-400">
-          Country code, digits only — for Kenya that looks like 2547XXXXXXXX.
-          Visitors send the appointment to this number.
+          Country code, digits only — for Kenya that looks like 254748903548.
+          Visitors send the appointment to this number. A Kenyan 07… number is
+          accepted and stored as 2547….
         </p>
         <div className="mt-3 flex flex-col gap-2 sm:flex-row">
           <Input
             id="whatsapp-number"
             inputMode="numeric"
             autoComplete="tel"
-            placeholder="2547XXXXXXXX"
+            placeholder="254748903548"
             value={whatsapp}
             onChange={(event) => setWhatsappDraft(event.target.value)}
           />

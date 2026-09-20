@@ -1,7 +1,9 @@
 import Image from "next/image";
+import { BookSessionCta } from "@/components/booking/book-now-button";
 import { STUDIO_LOGO } from "@/lib/partners";
 import type { ServicePageContent } from "@/lib/service-pages";
-import { CyanCta, SectionLabel } from "./shared";
+import { bookingProductForService } from "@/lib/services";
+import { SectionLabel } from "./shared";
 
 const MOCKUPS = [
   { title: "Dream Create Achieve", tone: "from-cyan-400 to-blue-600" },
@@ -78,7 +80,9 @@ export function DesignLayout({ page }: { page: ServicePageContent }) {
               </p>
             ) : null}
           </div>
-          <CyanCta href={page.cta.href}>{page.cta.label}</CyanCta>
+          <BookSessionCta product={bookingProductForService(page.slug)}>
+            {page.cta.label}
+          </BookSessionCta>
         </div>
       </section>
     </>

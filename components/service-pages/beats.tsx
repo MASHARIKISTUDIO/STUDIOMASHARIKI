@@ -1,8 +1,10 @@
 import { Check } from "lucide-react";
 import Image from "next/image";
+import { BookNowButton, BookSessionCta } from "@/components/booking/book-now-button";
 import type { ServicePageContent } from "@/lib/service-pages";
+import { bookingProductForService } from "@/lib/services";
 import { CtaBanner } from "./photography";
-import { CyanCta, SectionLabel } from "./shared";
+import { SectionLabel } from "./shared";
 
 export function BeatsLayout({ page }: { page: ServicePageContent }) {
   const packs = page.packs ?? [];
@@ -77,6 +79,10 @@ export function BeatsLayout({ page }: { page: ServicePageContent }) {
                     <p className="mt-4 font-display text-2xl tracking-wide text-cyan-300">
                       {rate.price}
                     </p>
+                    <BookNowButton
+                      product={bookingProductForService(page.slug)}
+                      className="mt-4 self-start px-3 py-1.5 text-[0.65rem]"
+                    />
                   </article>
                 </li>
               ))}
@@ -122,7 +128,9 @@ export function BeatsLayout({ page }: { page: ServicePageContent }) {
               <p className="font-script text-2xl text-cyan-300">
                 Custom beats. Real vibes.
               </p>
-              <CyanCta href={page.cta.href}>{page.cta.label}</CyanCta>
+              <BookSessionCta product={bookingProductForService(page.slug)}>
+                {page.cta.label}
+              </BookSessionCta>
             </div>
           </div>
         </div>

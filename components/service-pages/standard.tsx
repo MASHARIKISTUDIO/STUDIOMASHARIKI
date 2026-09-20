@@ -1,6 +1,8 @@
 import { ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
+import { BookableCard, BookNowButton } from "@/components/booking/book-now-button";
 import type { ServicePageContent } from "@/lib/service-pages";
+import { bookingProductForService } from "@/lib/services";
 import { CtaBanner } from "./photography";
 import { SectionLabel } from "./shared";
 
@@ -8,6 +10,9 @@ export function StandardLayout({ page }: { page: ServicePageContent }) {
   const offerings = page.offerings ?? [];
   const rates = page.rates ?? [];
   const steps = page.process ?? [];
+  const pageProduct = bookingProductForService(page.slug);
+  const tileClass =
+    "flex h-full flex-col rounded-xl border border-cyan-400/25 bg-gray-950 p-5 shadow-[0_0_20px_-12px_rgba(34,211,238,0.4)] transition-colors hover:border-cyan-400/70";
 
   return (
     <>
@@ -29,7 +34,7 @@ export function StandardLayout({ page }: { page: ServicePageContent }) {
                     <p className="mt-1.5 flex-1 text-xs leading-relaxed text-gray-400">
                       {item.text}
                     </p>
-                    {item.href !== undefined ? (
+                    {item.href !== undefined || item.bookingProductId !== undefined ? (
                       <span
                         aria-hidden="true"
                         className="mt-3 inline-flex size-8 items-center justify-center rounded-full border border-cyan-400/40 text-cyan-400"
@@ -42,15 +47,16 @@ export function StandardLayout({ page }: { page: ServicePageContent }) {
 
                 return (
                   <li key={item.title}>
-                    {item.href !== undefined ? (
-                      <Link
-                        href={item.href}
-                        className="flex h-full flex-col rounded-xl border border-cyan-400/25 bg-gray-950 p-5 shadow-[0_0_20px_-12px_rgba(34,211,238,0.4)] transition-colors hover:border-cyan-400/70"
-                      >
+                    {item.bookingProductId !== undefined ? (
+                      <BookableCard productId={item.bookingProductId} className={tileClass}>
+                        {inner}
+                      </BookableCard>
+                    ) : item.href !== undefined ? (
+                      <Link href={item.href} className={tileClass}>
                         {inner}
                       </Link>
                     ) : (
-                      <article className="flex h-full flex-col rounded-xl border border-cyan-400/25 bg-gray-950 p-5 shadow-[0_0_20px_-12px_rgba(34,211,238,0.4)]">
+                      <article className={tileClass}>
                         {inner}
                       </article>
                     )}
@@ -72,8 +78,8 @@ export function StandardLayout({ page }: { page: ServicePageContent }) {
                   <article
                     className={
                       rate.featured === true
-                        ? "rounded-xl border-2 border-cyan-400 bg-cyan-400/10 p-5"
-                        : "rounded-xl border border-cyan-400/25 bg-gray-950 p-5"
+                        ? "flex h-full flex-col rounded-xl border-2 border-cyan-400 bg-cyan-400/10 p-5"
+                        : "flex h-full flex-col rounded-xl border border-cyan-400/25 bg-gray-950 p-5"
                     }
                   >
                     <rate.icon
@@ -87,6 +93,12 @@ export function StandardLayout({ page }: { page: ServicePageContent }) {
                     <p className="mt-4 font-display text-2xl text-cyan-300">
                       {rate.price}
                     </p>
+                    {pageProduct !== undefined ? (
+                      <BookNowButton
+                        product={pageProduct}
+                        className="mt-4 self-start px-3 py-1.5 text-[0.65rem]"
+                      />
+                    ) : null}
                   </article>
                 </li>
               ))}

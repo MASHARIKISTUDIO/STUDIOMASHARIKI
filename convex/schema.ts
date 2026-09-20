@@ -30,11 +30,40 @@ export const roleValidator = v.union(
   v.literal("event_photographer"),
 );
 
-/** Studio session products that can be booked from /book-a-session. */
+/** Services that can be booked from the public calendar. */
 export const bookingProductValidator = v.union(
   v.literal("beatmaking"),
   v.literal("vocal-recording"),
   v.literal("mixing-mastering"),
+  v.literal("beat-production"),
+  v.literal("video-production"),
+  v.literal("music-videos"),
+  v.literal("choir-chorals"),
+  v.literal("events"),
+  v.literal("weddings"),
+  v.literal("burials"),
+  v.literal("ruracio"),
+  v.literal("anniversaries"),
+  v.literal("graduations"),
+  v.literal("social-media-reels"),
+  v.literal("corporate-events"),
+  v.literal("video-editing"),
+  v.literal("motion-graphics"),
+  v.literal("graphic-design"),
+  v.literal("photography"),
+  v.literal("portrait-photography"),
+  v.literal("event-photography"),
+  v.literal("product-photography"),
+  v.literal("real-estate-photography"),
+  v.literal("lifestyle-photography"),
+  v.literal("commercial-photography"),
+  v.literal("nature-photography"),
+  v.literal("photo-editing"),
+  v.literal("script-writing"),
+  v.literal("adverts"),
+  v.literal("documentaries"),
+  v.literal("short-films"),
+  v.literal("corporate-videos"),
 );
 
 /** Lifecycle of a WhatsApp booking request. */

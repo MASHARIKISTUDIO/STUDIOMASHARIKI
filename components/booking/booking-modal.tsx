@@ -18,17 +18,20 @@ import { Label } from "@/components/ui/label";
 import { api } from "@/convex/_generated/api";
 import {
   appointmentSummary,
+  DEFAULT_WHATSAPP_NUMBER,
   type CalendarProduct,
   formatLongDate,
   monthDateRange,
   monthFromDate,
   slotRangeLabel,
+  toWhatsappDigits,
 } from "@/lib/booking";
 import { cn } from "@/lib/utils";
 import { useBookingModal } from "./booking-provider";
 import { SessionCalendar } from "./session-calendar";
 
-const envWhatsapp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "";
+const envWhatsapp =
+  process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || DEFAULT_WHATSAPP_NUMBER;
 
 export function BookingModal({
   products,
@@ -45,9 +48,9 @@ export function BookingModal({
     <Dialog open={open} onOpenChange={(next) => { if (!next) close(); }}>
       <DialogContent className="max-h-[90svh] max-w-3xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Book a session</DialogTitle>
+          <DialogTitle>Book</DialogTitle>
           <DialogDescription>
-            Pick a date and time, then send the appointment on WhatsApp.
+            Pick a date and time, then send the booking on WhatsApp.
           </DialogDescription>
         </DialogHeader>
         {convex ? (
@@ -118,10 +121,11 @@ function ConnectedBookingForm({
       timesPending={occupiedRows === undefined}
       onRequest={async (args) => {
         const result = await requestAppointment(args);
+        const fallbackDigits = toWhatsappDigits(envWhatsapp);
         const fallbackUrl =
           result.whatsappUrl ??
-          (envWhatsapp.replace(/\D/g, "").length >= 10
-            ? `https://wa.me/${envWhatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(result.message)}`
+          (fallbackDigits.length >= 10
+            ? `https://wa.me/${fallbackDigits}?text=${encodeURIComponent(result.message)}`
             : null);
         return { ...result, whatsappUrl: fallbackUrl };
       }}
@@ -198,7 +202,7 @@ function BookingForm({
         message = [
           "Hi Studio Mashariki,",
           "",
-          "I'd like to book a session:",
+          "I'd like to book:",
           "",
           `Service: ${product.title} (${product.price})`,
           `Date: ${formatLongDate(date)}`,
@@ -207,7 +211,7 @@ function BookingForm({
           "",
           "Please confirm. Thanks!",
         ].join("\n");
-        const digits = envWhatsapp.replace(/\D/g, "");
+        const digits = toWhatsappDigits(envWhatsapp);
         url =
           digits.length >= 10
             ? `https://wa.me/${digits}?text=${encodeURIComponent(message)}`
@@ -242,7 +246,7 @@ function BookingForm({
         <legend className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-cyan-400">
           Service
         </legend>
-        <div className="mt-2 grid gap-2 sm:grid-cols-3">
+        <div className="mt-2 grid max-h-48 gap-2 overflow-y-auto sm:grid-cols-3">
           {products.map((item) => {
             const active = item.id === productId;
             return (

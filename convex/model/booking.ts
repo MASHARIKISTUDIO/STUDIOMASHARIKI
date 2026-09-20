@@ -29,19 +29,48 @@ const DATE_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 export const BOOKING_SETTINGS_KEY = "booking";
 
-export type BookingProductId =
-  | "beatmaking"
-  | "vocal-recording"
-  | "mixing-mastering";
+/**
+ * Default WhatsApp destination when Convex has no number saved yet.
+ * Kenya 0748903548 → 254748903548.
+ */
+export const DEFAULT_WHATSAPP_NUMBER = "254748903548";
 
-export const BOOKING_PRODUCTS: Record<
-  BookingProductId,
-  { title: string; price: string }
-> = {
-  beatmaking: { title: "Beatmaking", price: "4,000/=" },
+export const BOOKING_PRODUCTS = {
+  beatmaking: { title: "Beat Making", price: "4,000/=" },
   "vocal-recording": { title: "Vocal Recording", price: "1,000/=" },
   "mixing-mastering": { title: "Mixing & Mastering", price: "1,500/=" },
-};
+  "beat-production": { title: "Beat Production", price: "Quote" },
+  "video-production": { title: "Video Production", price: "Quote" },
+  "music-videos": { title: "Music Videos", price: "Quote" },
+  "choir-chorals": { title: "Choir Chorals", price: "Quote" },
+  events: { title: "Events", price: "Quote" },
+  weddings: { title: "Weddings", price: "Quote" },
+  burials: { title: "Burials", price: "Quote" },
+  ruracio: { title: "Ruracio", price: "Quote" },
+  anniversaries: { title: "Anniversaries", price: "Quote" },
+  graduations: { title: "Graduations", price: "Quote" },
+  "social-media-reels": { title: "Social Media Reels", price: "Quote" },
+  "corporate-events": { title: "Corporate Events", price: "Quote" },
+  "video-editing": { title: "Video Editing & Colour Grading", price: "Quote" },
+  "motion-graphics": { title: "Motion Graphic Designs", price: "Quote" },
+  "graphic-design": { title: "Graphic Design", price: "Quote" },
+  photography: { title: "Photography", price: "Quote" },
+  "portrait-photography": { title: "Portrait Photography", price: "Quote" },
+  "event-photography": { title: "Event Photography", price: "Quote" },
+  "product-photography": { title: "Product Photography", price: "Quote" },
+  "real-estate-photography": { title: "Real Estate Photography", price: "Quote" },
+  "lifestyle-photography": { title: "Lifestyle Photography", price: "Quote" },
+  "commercial-photography": { title: "Commercial Photography", price: "Quote" },
+  "nature-photography": { title: "Nature & Landscape Photography", price: "Quote" },
+  "photo-editing": { title: "Photo Editing & Retouching", price: "Quote" },
+  "script-writing": { title: "Script Writing", price: "Quote" },
+  adverts: { title: "Adverts", price: "Quote" },
+  documentaries: { title: "Documentaries", price: "Quote" },
+  "short-films": { title: "Short Films", price: "Quote" },
+  "corporate-videos": { title: "Corporate Videos", price: "Quote" },
+} as const;
+
+export type BookingProductId = keyof typeof BOOKING_PRODUCTS;
 
 export const BOOKING_PRODUCT_IDS = Object.keys(
   BOOKING_PRODUCTS,
@@ -238,7 +267,7 @@ export function composeAppointmentMessage(args: {
   const lines = [
     "Hi Studio Mashariki,",
     "",
-    "I'd like to book a session:",
+    "I'd like to book:",
     "",
     `Service: ${product.title} (${product.price})`,
     `Date: ${formatLongDate(args.date)}`,
@@ -255,14 +284,43 @@ export function digitsOnly(value: string): string {
   return value.replace(/\D/g, "");
 }
 
+/**
+ * Kenya-aware WhatsApp MSISDN: 0748… / 748… becomes 254748….
+ * Other numbers are returned as digits only.
+ */
+export function toWhatsappDigits(value: string): string {
+  const digits = digitsOnly(value);
+  if (digits.startsWith("254")) {
+    return digits;
+  }
+  if (digits.startsWith("0") && digits.length === 10) {
+    return `254${digits.slice(1)}`;
+  }
+  if (digits.startsWith("7") && digits.length === 9) {
+    return `254${digits}`;
+  }
+  return digits;
+}
+
+export function resolveWhatsappNumber(stored?: string | null): string {
+  const fromSettings =
+    stored !== undefined && stored !== null && stored.length > 0
+      ? toWhatsappDigits(stored)
+      : "";
+  if (isWhatsappNumber(fromSettings)) {
+    return fromSettings;
+  }
+  return DEFAULT_WHATSAPP_NUMBER;
+}
+
 /** International WhatsApp destination: 10–15 digits, no leading plus. */
 export function isWhatsappNumber(value: string): boolean {
-  const digits = digitsOnly(value);
+  const digits = toWhatsappDigits(value);
   return digits.length >= 10 && digits.length <= 15;
 }
 
 export function whatsappUrl(number: string, text: string): string {
-  return `https://wa.me/${digitsOnly(number)}?text=${encodeURIComponent(text)}`;
+  return `https://wa.me/${toWhatsappDigits(number)}?text=${encodeURIComponent(text)}`;
 }
 
 export function assertDateRange(fromDate: string, toDate: string): void {

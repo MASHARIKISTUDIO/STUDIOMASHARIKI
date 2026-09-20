@@ -8,7 +8,6 @@ import {
   BOOKING_SETTINGS_KEY,
   composeAppointmentMessage,
   daysBetween,
-  digitsOnly,
   isBookableStartMinutes,
   isDateString,
   isStudioOpenDate,
@@ -19,7 +18,9 @@ import {
   loadRequestedAppointments,
   MAX_ADVANCE_DAYS,
   nairobiDateString,
+  resolveWhatsappNumber,
   slotStartUtcMs,
+  toWhatsappDigits,
   whatsappUrl,
 } from "./model/booking";
 import { requireAdmin, requireAdminRead } from "./model/users";
@@ -152,9 +153,9 @@ export const bookingContact = query({
   returns: v.object({ whatsappConfigured: v.boolean() }),
   handler: async (ctx) => {
     const settings = await loadBookingSettings(ctx);
-    const number = settings?.whatsappNumber;
+    const number = resolveWhatsappNumber(settings?.whatsappNumber);
     return {
-      whatsappConfigured: number !== undefined && isWhatsappNumber(number),
+      whatsappConfigured: isWhatsappNumber(number),
     };
   },
 });
@@ -215,14 +216,11 @@ export const requestAppointment = mutation({
     });
 
     const settings = await loadBookingSettings(ctx);
-    const number = settings?.whatsappNumber;
+    const number = resolveWhatsappNumber(settings?.whatsappNumber);
     return {
       appointmentId,
       message,
-      whatsappUrl:
-        number !== undefined && isWhatsappNumber(number)
-          ? whatsappUrl(number, message)
-          : null,
+      whatsappUrl: isWhatsappNumber(number) ? whatsappUrl(number, message) : null,
     };
   },
 });
@@ -273,14 +271,15 @@ export const listAdminSchedule = query({
       appointments: booked.map((row) => ({
         _id: row._id,
         productId: row.productId,
-        productTitle: BOOKING_PRODUCTS[row.productId].title,
+        productTitle:
+          BOOKING_PRODUCTS[row.productId]?.title ?? row.productId,
         date: row.date,
         startMinutes: row.startMinutes,
         customerName: row.customerName,
         status: row.status,
         createdAt: row.createdAt,
       })),
-      whatsappNumber: settings?.whatsappNumber ?? null,
+      whatsappNumber: resolveWhatsappNumber(settings?.whatsappNumber),
     };
   },
 });
@@ -392,7 +391,7 @@ export const setWhatsappNumber = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const admin = await requireAdmin(ctx);
-    const digits = digitsOnly(args.whatsappNumber);
+    const digits = toWhatsappDigits(args.whatsappNumber);
     if (digits.length > 0 && !isWhatsappNumber(digits)) {
       throw new Error("Enter a WhatsApp number with country code, digits only.");
     }

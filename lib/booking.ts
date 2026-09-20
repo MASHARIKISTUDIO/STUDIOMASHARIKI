@@ -1,10 +1,13 @@
 import {
   addDays,
+  BOOKING_PRODUCTS,
+  BOOKING_PRODUCT_IDS,
   formatLongDate,
   formatMinutes,
   MAX_ADVANCE_DAYS,
   parseDateParts,
   SLOT_DURATION_MINUTES,
+  type BookingProductId,
 } from "@/convex/model/booking";
 
 export {
@@ -12,6 +15,7 @@ export {
   BOOKING_PRODUCTS,
   BOOKING_PRODUCT_IDS,
   BOOKING_TIMEZONE,
+  DEFAULT_WHATSAPP_NUMBER,
   formatLongDate,
   formatMinutes,
   isStudioOpenDate,
@@ -20,8 +24,10 @@ export {
   nairobiDateString,
   nairobiMinutesFromMidnight,
   occupiedKey,
+  resolveWhatsappNumber,
   SLOT_DURATION_MINUTES,
   slotStartUtcMs,
+  toWhatsappDigits,
   type BookingProductId,
 } from "@/convex/model/booking";
 
@@ -36,10 +42,19 @@ export const WEEKDAY_LABELS = [
 ] as const;
 
 export type CalendarProduct = {
-  id: import("@/convex/model/booking").BookingProductId;
+  id: BookingProductId;
   title: string;
   price: string;
 };
+
+export function calendarProduct(id: BookingProductId): CalendarProduct {
+  const item = BOOKING_PRODUCTS[id];
+  return { id, title: item.title, price: item.price };
+}
+
+export function allCalendarProducts(): CalendarProduct[] {
+  return BOOKING_PRODUCT_IDS.map(calendarProduct);
+}
 
 /** First and last Nairobi calendar dates of a month (inclusive). */
 export function monthDateRange(

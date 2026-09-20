@@ -39,6 +39,7 @@ import {
   WandSparkles,
   Zap,
 } from "lucide-react";
+import type { BookingProductId } from "@/lib/booking";
 
 /**
  * Copy and structure for every service landing page.
@@ -69,6 +70,7 @@ export type ServiceOffering = {
   icon: LucideIcon;
   image?: string;
   href?: string;
+  bookingProductId?: BookingProductId;
 };
 
 export type ServiceReason = {
@@ -92,7 +94,7 @@ export type ServiceStep = {
 };
 
 export type BookingOffer = {
-  id: "beatmaking" | "vocal-recording" | "mixing-mastering";
+  id: BookingProductId;
   title: string;
   kicker: string;
   text: string;
@@ -105,7 +107,8 @@ export type VideoSubService = {
   title: string;
   text: string;
   icon: LucideIcon;
-  href: string;
+  href?: string;
+  bookingProductId?: BookingProductId;
 };
 
 export type VideoTier = {
@@ -199,48 +202,56 @@ export const SERVICE_PAGES: Record<string, ServicePageContent> = {
         text: "Professional portraits for individuals, brands and creatives.",
         icon: User,
         image: img("photo-1531746020798-e6953c6e8e04", 800),
+        bookingProductId: "portrait-photography",
       },
       {
         title: "Event Photography",
         text: "Weddings, birthdays, corporate events and special occasions.",
         icon: CalendarDays,
         image: img("photo-1519741497674-611481863552", 800),
+        bookingProductId: "event-photography",
       },
       {
         title: "Product Photography",
         text: "High-quality product shots that sell.",
         icon: Package,
         image: img("photo-1542291026-7eec264c27ff", 800),
+        bookingProductId: "product-photography",
       },
       {
         title: "Real Estate Photography",
         text: "Showcasing properties with stunning visuals.",
         icon: Home,
         image: img("photo-1600596542815-ffad4c1539a9", 800),
+        bookingProductId: "real-estate-photography",
       },
       {
         title: "Lifestyle Photography",
         text: "Real moments. Real people. Real stories.",
         icon: Heart,
         image: img("photo-1449824913935-59a10b8d2000", 800),
+        bookingProductId: "lifestyle-photography",
       },
       {
         title: "Commercial Photography",
         text: "For businesses, brands and advertising campaigns.",
         icon: Briefcase,
         image: img("photo-1556761175-b413da4baf72", 800),
+        bookingProductId: "commercial-photography",
       },
       {
         title: "Nature & Landscape",
         text: "Breathtaking views, perfectly captured.",
         icon: Mountain,
         image: img("photo-1469474968028-56623f02e42e", 800),
+        bookingProductId: "nature-photography",
       },
       {
         title: "Photo Editing & Retouching",
         text: "Clean, sharp and professional finishing.",
         icon: Aperture,
         image: img("photo-1611532736597-de2d4265fba3", 800),
+        bookingProductId: "photo-editing",
       },
     ],
     reasonsHeading: "Why choose us?",
@@ -539,48 +550,56 @@ export const SERVICE_PAGES: Record<string, ServicePageContent> = {
             text: "Bring your sound to life with cinematic visuals.",
             icon: Music,
             href: "/categories/music-videos",
+            bookingProductId: "music-videos",
           },
           {
             title: "Reels",
             text: "Short, catchy, impactful content for social media.",
             icon: Smartphone,
             href: "/categories/social-media-reels",
+            bookingProductId: "social-media-reels",
           },
           {
             title: "Adverts",
             text: "Promote your brand with professional ads.",
             icon: Play,
             href: "#enquire",
+            bookingProductId: "adverts",
           },
           {
             title: "Documentaries",
             text: "Real stories. Real people. Powerful storytelling.",
             icon: Film,
             href: "#enquire",
+            bookingProductId: "documentaries",
           },
           {
             title: "Short Films",
             text: "Creative films that inspire and entertain.",
             icon: Clapperboard,
             href: "#enquire",
+            bookingProductId: "short-films",
           },
           {
             title: "Event Coverage",
             text: "Capture your special moments, professionally.",
             icon: CalendarDays,
             href: "/categories/events",
+            bookingProductId: "events",
           },
           {
             title: "Corporate Videos",
             text: "Professional videos for your business.",
             icon: Building2,
             href: "#enquire",
+            bookingProductId: "corporate-videos",
           },
           {
             title: "Social Media Content",
             text: "Engaging content that grows your audience.",
             icon: Share2,
             href: "/categories/social-media-reels",
+            bookingProductId: "social-media-reels",
           },
         ],
       },
@@ -597,48 +616,56 @@ export const SERVICE_PAGES: Record<string, ServicePageContent> = {
             text: "Bring your sound to life with cinematic visuals.",
             icon: Music,
             href: "/categories/music-videos",
+            bookingProductId: "music-videos",
           },
           {
             title: "Reels",
             text: "Short, catchy, impactful content for social media.",
             icon: Smartphone,
             href: "/categories/social-media-reels",
+            bookingProductId: "social-media-reels",
           },
           {
             title: "Adverts",
             text: "Promote your brand with professional ads.",
             icon: Play,
             href: "#enquire",
+            bookingProductId: "adverts",
           },
           {
             title: "Documentaries",
             text: "Real stories. Real people. Powerful storytelling.",
             icon: Film,
             href: "#enquire",
+            bookingProductId: "documentaries",
           },
           {
             title: "Short Films",
             text: "Creative films that inspire and entertain.",
             icon: Clapperboard,
             href: "#enquire",
+            bookingProductId: "short-films",
           },
           {
             title: "Event Coverage",
             text: "Capture your special moments, professionally.",
             icon: CalendarDays,
             href: "/categories/events",
+            bookingProductId: "events",
           },
           {
             title: "Corporate Videos",
             text: "Professional videos for your business.",
             icon: Building2,
             href: "#enquire",
+            bookingProductId: "corporate-videos",
           },
           {
             title: "Social Media Content",
             text: "Engaging content that grows your audience.",
             icon: Share2,
             href: "/categories/social-media-reels",
+            bookingProductId: "social-media-reels",
           },
         ],
       },
@@ -846,42 +873,49 @@ export const SERVICE_PAGES: Record<string, ServicePageContent> = {
         text: "Arusi films made to be rewatched.",
         icon: Heart,
         href: "/categories/arusi",
+        bookingProductId: "weddings",
       },
       {
         title: "Ruracio",
         text: "Dowry ceremony coverage, honoured properly.",
         icon: Users,
         href: "/categories/ruracio",
+        bookingProductId: "ruracio",
       },
       {
         title: "Burials",
         text: "Respectful, complete funeral films.",
         icon: Flower2,
         href: "/categories/funeral",
+        bookingProductId: "burials",
       },
       {
         title: "Anniversaries",
         text: "Milestone days, captured with care.",
         icon: Star,
         href: "/categories/anniversaries",
+        bookingProductId: "anniversaries",
       },
       {
         title: "Graduations",
         text: "The walk, the moment, the people who got you there.",
         icon: Landmark,
         href: "/categories/graduations",
+        bookingProductId: "graduations",
       },
       {
         title: "Corporate events",
         text: "Conferences, launches and brand days.",
         icon: Building2,
         href: "/categories/events",
+        bookingProductId: "corporate-events",
       },
       {
         title: "Social media reels",
         text: "Short, shareable cuts from the day.",
         icon: Smartphone,
         href: "/categories/social-media-reels",
+        bookingProductId: "social-media-reels",
       },
     ],
     cta: {

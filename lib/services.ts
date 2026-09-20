@@ -13,6 +13,7 @@ import {
   WandSparkles,
 } from "lucide-react";
 import type { GalleryCategory } from "@/convex/categories";
+import { calendarProduct, type BookingProductId, type CalendarProduct } from "@/lib/booking";
 
 /**
  * What Studio Mashariki sells, in the order the homepage grid shows it.
@@ -33,6 +34,8 @@ import type { GalleryCategory } from "@/convex/categories";
 export type ServiceLink = {
   label: string;
   category: GalleryCategory;
+  /** Opens the booking calendar for this occasion / format. */
+  bookingProductId: BookingProductId;
 };
 
 export type Service = {
@@ -65,6 +68,11 @@ export type Service = {
    */
   href: string;
   /**
+   * Product pre-selected when Book now is tapped on this card.
+   * Omitted on "Book a Session" so the visitor picks Beatmaking / Vocals / Mix.
+   */
+  bookingProductId?: BookingProductId;
+  /**
    * Gallery categories to surface as links inside the card, for services that
    * map onto the delivery taxonomy. This is what keeps the category pages
    * linked from the homepage now that the old 12-tile category grid is gone.
@@ -88,6 +96,7 @@ export const SERVICES: readonly Service[] = [
     icon: SlidersHorizontal,
     image: null,
     href: "/services/mixing-and-mastering",
+    bookingProductId: "mixing-mastering",
   },
   {
     slug: "beat-production",
@@ -96,6 +105,7 @@ export const SERVICES: readonly Service[] = [
     icon: AudioLines,
     image: null,
     href: "/services/beat-production",
+    bookingProductId: "beat-production",
   },
   {
     slug: "video-production",
@@ -104,9 +114,10 @@ export const SERVICES: readonly Service[] = [
     icon: Video,
     image: null,
     href: "/services/video-production",
+    bookingProductId: "video-production",
     categoryLinks: [
-      { label: "Music Videos", category: "music-videos" },
-      { label: "Choir Chorals", category: "choir-chorals" },
+      { label: "Music Videos", category: "music-videos", bookingProductId: "music-videos" },
+      { label: "Choir Chorals", category: "choir-chorals", bookingProductId: "choir-chorals" },
     ],
   },
   {
@@ -120,14 +131,15 @@ export const SERVICES: readonly Service[] = [
     icon: CalendarDays,
     image: null,
     href: "/services/events",
+    bookingProductId: "events",
     categoryLinks: [
-      { label: "Weddings", category: "arusi" },
-      { label: "Burials", category: "funeral" },
-      { label: "Ruracio", category: "ruracio" },
-      { label: "Anniversaries", category: "anniversaries" },
-      { label: "Graduations", category: "graduations" },
-      { label: "Social Media Reels", category: "social-media-reels" },
-      { label: "Corporate Events", category: "events" },
+      { label: "Weddings", category: "arusi", bookingProductId: "weddings" },
+      { label: "Burials", category: "funeral", bookingProductId: "burials" },
+      { label: "Ruracio", category: "ruracio", bookingProductId: "ruracio" },
+      { label: "Anniversaries", category: "anniversaries", bookingProductId: "anniversaries" },
+      { label: "Graduations", category: "graduations", bookingProductId: "graduations" },
+      { label: "Social Media Reels", category: "social-media-reels", bookingProductId: "social-media-reels" },
+      { label: "Corporate Events", category: "events", bookingProductId: "corporate-events" },
     ],
   },
   {
@@ -137,6 +149,7 @@ export const SERVICES: readonly Service[] = [
     icon: Film,
     image: null,
     href: "/services/video-editing-and-colour-grading",
+    bookingProductId: "video-editing",
   },
   {
     slug: "motion-graphic-designs",
@@ -145,6 +158,7 @@ export const SERVICES: readonly Service[] = [
     icon: WandSparkles,
     image: null,
     href: "/services/motion-graphic-designs",
+    bookingProductId: "motion-graphics",
   },
   {
     slug: "graphic-design",
@@ -153,6 +167,7 @@ export const SERVICES: readonly Service[] = [
     icon: Palette,
     image: null,
     href: "/services/graphic-design",
+    bookingProductId: "graphic-design",
   },
   {
     slug: "beat-making",
@@ -161,6 +176,7 @@ export const SERVICES: readonly Service[] = [
     icon: LayoutGrid,
     image: null,
     href: "/services/beat-making",
+    bookingProductId: "beatmaking",
   },
   {
     slug: "photography",
@@ -169,6 +185,7 @@ export const SERVICES: readonly Service[] = [
     icon: Camera,
     image: null,
     href: "/services/photography",
+    bookingProductId: "photography",
   },
   {
     slug: "script-writing",
@@ -177,5 +194,16 @@ export const SERVICES: readonly Service[] = [
     icon: FileText,
     image: null,
     href: "/services/script-writing",
+    bookingProductId: "script-writing",
   },
 ] as const;
+
+export function bookingProductForService(
+  slug: string,
+): CalendarProduct | undefined {
+  const service = SERVICES.find((item) => item.slug === slug);
+  if (service === undefined || service.bookingProductId === undefined) {
+    return undefined;
+  }
+  return calendarProduct(service.bookingProductId);
+}
