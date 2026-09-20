@@ -1,9 +1,9 @@
 "use client";
 
 import { useAuth } from "@clerk/nextjs";
-import { ConvexReactClient } from "convex/react";
+import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
-import type { ReactNode } from "react";
+import { createContext, useContext, type ReactNode } from "react";
 
 const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
 
@@ -17,14 +17,33 @@ const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
  */
 export const convex = convexUrl ? new ConvexReactClient(convexUrl) : null;
 
-export function Providers({ children }: { children: ReactNode }) {
-  if (!convex) {
-    return <>{children}</>;
-  }
+const ClerkConfiguredContext = createContext(false);
 
-  return (
+/** Whether `<ClerkProvider>` is mounted. Sourced from the server layout. */
+export function useClerkConfigured(): boolean {
+  return useContext(ClerkConfiguredContext);
+}
+
+export function Providers({
+  children,
+  clerkConfigured,
+}: {
+  children: ReactNode;
+  clerkConfigured: boolean;
+}) {
+  const tree = !convex ? (
+    <>{children}</>
+  ) : clerkConfigured ? (
     <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
       {children}
     </ConvexProviderWithClerk>
+  ) : (
+    <ConvexProvider client={convex}>{children}</ConvexProvider>
+  );
+
+  return (
+    <ClerkConfiguredContext.Provider value={clerkConfigured}>
+      {tree}
+    </ClerkConfiguredContext.Provider>
   );
 }

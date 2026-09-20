@@ -1,5 +1,10 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
+import { NextResponse, type NextProxy } from "next/server";
+import {
+  clerkPublishableKey,
+  isClerkConfigured,
+  isClerkSecretConfigured,
+} from "@/lib/clerk-config";
 import { roleFromSessionClaims } from "@/lib/roles";
 
 /**
@@ -17,7 +22,7 @@ const isProtectedRoute = createRouteMatcher(["/dashboard(.*)"]);
  */
 const isAdminRoute = createRouteMatcher(["/dashboard/admin(.*)", "/api/admin(.*)"]);
 
-export const proxy = clerkMiddleware(async (auth, request) => {
+const clerkProxy = clerkMiddleware(async (auth, request) => {
   if (isProtectedRoute(request)) {
     // Redirects unauthenticated visitors to the Clerk sign-in flow.
     await auth.protect();
@@ -40,7 +45,18 @@ export const proxy = clerkMiddleware(async (auth, request) => {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }
-});
+}, { publishableKey: clerkPublishableKey });
+
+const passThrough: NextProxy = () => NextResponse.next();
+
+/**
+ * Clerk's middleware throws on every matched request when the secret key is
+ * missing. Export both the Next.js 16 named `proxy` and a default export so
+ * Clerk can detect the middleware.
+ */
+export const proxy =
+  isClerkConfigured && isClerkSecretConfigured() ? clerkProxy : passThrough;
+export default proxy;
 
 export const config = {
   matcher: [

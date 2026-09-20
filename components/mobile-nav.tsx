@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { SocialLinks } from "@/components/social-links";
 import { Button } from "@/components/ui/button";
+import { useClerkConfigured } from "@/app/providers";
 import { NAV_LINKS } from "@/lib/navigation";
 import { SERVICES } from "@/lib/services";
 
@@ -24,11 +25,11 @@ import { SERVICES } from "@/lib/services";
  * Component like this one.
  */
 export function MobileNav() {
+  const clerkConfigured = useClerkConfigured();
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  const { isLoaded, isSignedIn } = useUser();
 
   const close = useCallback(() => {
     setOpen(false);
@@ -167,34 +168,45 @@ export function MobileNav() {
             <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-white/10 pt-6">
               {/* Rendered only once Clerk has resolved, so a signed-in visitor
                   never sees "Sign in" flash before their dashboard link. */}
-              {isLoaded ? (
-                isSignedIn ? (
-                  <Button asChild size="sm" variant="secondary">
-                    <Link href="/dashboard" onClick={close}>
-                      Dashboard
-                    </Link>
-                  </Button>
-                ) : (
-                  <>
-                    <Button asChild size="sm" variant="ghost" className="text-gray-300">
-                      <Link href="/sign-in" onClick={close}>
-                        Sign in
-                      </Link>
-                    </Button>
-                    <Button asChild size="sm">
-                      <Link href="/sign-up" onClick={close}>
-                        Create account
-                      </Link>
-                    </Button>
-                  </>
-                )
-              ) : null}
+              {clerkConfigured ? <AccountActions onNavigate={close} /> : null}
 
               <SocialLinks className="ml-auto flex items-center gap-1 sm:hidden" />
             </div>
           </div>
         </div>
       ) : null}
+    </>
+  );
+}
+
+function AccountActions({ onNavigate }: { onNavigate: () => void }) {
+  const { isLoaded, isSignedIn } = useUser();
+  if (!isLoaded) {
+    return null;
+  }
+
+  if (isSignedIn) {
+    return (
+      <Button asChild size="sm" variant="secondary">
+        <Link href="/dashboard" onClick={onNavigate}>
+          Dashboard
+        </Link>
+      </Button>
+    );
+  }
+
+  return (
+    <>
+      <Button asChild size="sm" variant="ghost" className="text-gray-300">
+        <Link href="/sign-in" onClick={onNavigate}>
+          Sign in
+        </Link>
+      </Button>
+      <Button asChild size="sm">
+        <Link href="/sign-up" onClick={onNavigate}>
+          Create account
+        </Link>
+      </Button>
     </>
   );
 }

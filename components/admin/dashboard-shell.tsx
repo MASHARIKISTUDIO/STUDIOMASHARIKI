@@ -4,13 +4,14 @@ import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import Link from "next/link";
 import { useEffect } from "react";
-import { convex } from "@/app/providers";
+import { convex, useClerkConfigured } from "@/app/providers";
 import { api } from "@/convex/_generated/api";
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
+  const clerkConfigured = useClerkConfigured();
   return (
     <div className="flex-1 bg-gray-950">
-      {convex ? <EnsureUser /> : null}
+      {convex && clerkConfigured ? <EnsureUser /> : null}
       <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 lg:flex-row">
         {convex ? <DashboardNav /> : null}
         <div className="min-w-0 flex-1">{children}</div>

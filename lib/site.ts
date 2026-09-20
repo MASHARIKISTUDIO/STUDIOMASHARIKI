@@ -7,10 +7,20 @@
 
 const fallbackUrl = "https://studiomashariki.com";
 
+function resolveSiteUrl(): string {
+  const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (!raw) {
+    return fallbackUrl;
+  }
+  try {
+    return new URL(raw).origin;
+  } catch {
+    return fallbackUrl;
+  }
+}
+
 /** Absolute origin, no trailing slash. */
-export const siteUrl = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? fallbackUrl
-).replace(/\/+$/, "");
+export const siteUrl = resolveSiteUrl();
 
 export const siteConfig = {
   name: "Studio Mashariki",
