@@ -24,13 +24,18 @@ function OverviewCopy({ isAdmin }: { isAdmin: boolean }) {
       <h1 className="text-xl font-bold text-white">Dashboard</h1>
       <p className="mt-2 max-w-xl text-sm text-gray-400">
         Session bookings from the public calendar land here as WhatsApp
-        requests. Admins set busy hours and the studio WhatsApp number on the
-        session hours board.
+        requests. Admins set busy hours, the studio WhatsApp number, and the
+        homepage and gallery hero videos.
       </p>
       {isAdmin ? (
-        <Button asChild className="mt-5">
-          <Link href="/dashboard/admin/availability">Open session hours</Link>
-        </Button>
+        <div className="mt-5 flex flex-wrap gap-2">
+          <Button asChild>
+            <Link href="/dashboard/admin/availability">Open session hours</Link>
+          </Button>
+          <Button asChild variant="secondary">
+            <Link href="/dashboard/admin/hero">Hero videos</Link>
+          </Button>
+        </div>
       ) : (
         <p className="mt-4 text-sm text-gray-500">
           Availability is managed by studio admins.

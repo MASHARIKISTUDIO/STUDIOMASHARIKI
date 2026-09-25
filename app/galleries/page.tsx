@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { GalleryCard } from "@/components/gallery-card";
+import { HeroVideo } from "@/components/hero-video";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { listPublicGalleries } from "@/lib/convex-server";
+import { getHeroVideos, listPublicGalleries } from "@/lib/convex-server";
 import { absoluteUrl, siteConfig } from "@/lib/site";
 
 /**
@@ -23,7 +24,10 @@ export const metadata: Metadata = {
 };
 
 export default async function GalleriesPage() {
-  const galleries = await listPublicGalleries({ limit: 60 });
+  const [galleries, heroes] = await Promise.all([
+    listPublicGalleries({ limit: 60 }),
+    getHeroVideos(),
+  ]);
 
   return (
     <>
@@ -31,6 +35,9 @@ export default async function GalleriesPage() {
 
       <main className="flex-1 bg-gray-950">
         <section className="relative overflow-hidden border-b border-white/10">
+          {heroes.galleryVideoUrl !== null ? (
+            <HeroVideo src={heroes.galleryVideoUrl} />
+          ) : null}
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_30%_0%,rgba(37,99,235,0.2),transparent_70%)]"

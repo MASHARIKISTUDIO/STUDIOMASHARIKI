@@ -53,14 +53,24 @@ function DashboardNav() {
           </Link>
         </li>
         {isAdmin ? (
-          <li>
-            <Link
-              href="/dashboard/admin/availability"
-              className="block rounded-lg px-3 py-2 text-sm text-gray-300 transition-colors hover:bg-white/5 hover:text-white"
-            >
-              Session hours
-            </Link>
-          </li>
+          <>
+            <li>
+              <Link
+                href="/dashboard/admin/availability"
+                className="block rounded-lg px-3 py-2 text-sm text-gray-300 transition-colors hover:bg-white/5 hover:text-white"
+              >
+                Session hours
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/dashboard/admin/hero"
+                className="block rounded-lg px-3 py-2 text-sm text-gray-300 transition-colors hover:bg-white/5 hover:text-white"
+              >
+                Hero videos
+              </Link>
+            </li>
+          </>
         ) : null}
       </ul>
     </nav>

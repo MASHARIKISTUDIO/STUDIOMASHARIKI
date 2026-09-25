@@ -1,6 +1,7 @@
 import { CalendarDays, Images } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { HeroVideo } from "@/components/hero-video";
 import { Button } from "@/components/ui/button";
 import { STUDIO_LOGO } from "@/lib/partners";
 import { HERO_IMAGE } from "@/lib/site-media";
@@ -16,10 +17,12 @@ const CRAFT = ["Record", "Mix", "Master", "Create"] as const;
  * the photo rather than under it, which is what gives the neon cast the design
  * has - underneath, they would be completely hidden by an opaque image.
  */
-export function HomeHero() {
+export function HomeHero({ videoUrl }: { videoUrl: string | null }) {
   return (
     <section className="relative overflow-hidden border-b border-white/10">
-      {HERO_IMAGE !== null ? (
+      {videoUrl !== null ? (
+        <HeroVideo src={videoUrl} />
+      ) : HERO_IMAGE !== null ? (
         <>
           <Image
             src={HERO_IMAGE}

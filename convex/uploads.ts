@@ -3,6 +3,7 @@
 import { S3Client } from "@aws-sdk/client-s3";
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 import { v } from "convex/values";
+import { api } from "./_generated/api";
 import { action } from "./_generated/server";
 
 /**
@@ -21,6 +22,8 @@ import { action } from "./_generated/server";
 const MAX_VIDEO_BYTES = 5 * 1024 * 1024 * 1024;
 /** 100 MB - generous for a full-resolution RAW/JPEG export. */
 const MAX_IMAGE_BYTES = 100 * 1024 * 1024;
+/** Short looped hero backgrounds. A multi-gigabyte master would stall mobile. */
+const MAX_HERO_VIDEO_BYTES = 80 * 1024 * 1024;
 
 const PRESIGN_EXPIRY_SECONDS = 600;
 
@@ -88,12 +91,15 @@ function buildObjectKey(
   mediaType: "video" | "image",
   fileName: string,
   variant: "preview" | "original",
+  prefixOverride?: string,
 ) {
   const now = new Date();
   const year = now.getUTCFullYear();
   const month = String(now.getUTCMonth() + 1).padStart(2, "0");
   const folder = mediaType === "video" ? "videos" : "images";
-  const prefix = variant === "original" ? PRIVATE_PREFIX : PUBLIC_PREFIX;
+  const prefix =
+    prefixOverride ??
+    (variant === "original" ? PRIVATE_PREFIX : PUBLIC_PREFIX);
   return `${prefix}/${folder}/${year}/${month}/${randomToken()}-${sanitiseFileName(fileName)}`;
 }
 
@@ -195,6 +201,11 @@ export const getUploadDestination = action({
      * The browser uploads both for a paid image; see `lib/media/derivatives.ts`.
      */
     variant: v.optional(v.union(v.literal("preview"), v.literal("original"))),
+    /**
+     * "hero" forces a public progressive file (MP4/WebM on S3) and an admin
+     * caller. Cloudflare HLS cannot play as a CSS background.
+     */
+    purpose: v.optional(v.literal("hero")),
   },
   returns: uploadDestinationValidator,
   handler: async (ctx, args) => {
@@ -204,8 +215,26 @@ export const getUploadDestination = action({
       throw new Error("Not authenticated.");
     }
 
+    if (args.purpose === "hero") {
+      const me = await ctx.runQuery(api.users.current, {});
+      if (me === null || me.role !== "admin") {
+        throw new Error("Not authorized.");
+      }
+      if (args.mediaType !== "video") {
+        throw new Error("Hero backgrounds must be a video.");
+      }
+      const type = args.contentType.toLowerCase();
+      if (type !== "video/mp4" && type !== "video/webm") {
+        throw new Error("Upload an MP4 or WebM file.");
+      }
+    }
+
     const maxBytes =
-      args.mediaType === "video" ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
+      args.purpose === "hero"
+        ? MAX_HERO_VIDEO_BYTES
+        : args.mediaType === "video"
+          ? MAX_VIDEO_BYTES
+          : MAX_IMAGE_BYTES;
 
     if (args.sizeBytes !== undefined && args.sizeBytes > maxBytes) {
       throw new Error(
@@ -231,6 +260,7 @@ export const getUploadDestination = action({
     // private S3 prefix, because Stream serves transcoded HLS renditions, not
     // the untouched file an attendee is paying for.
     if (
+      args.purpose !== "hero" &&
       provider === "cloudflare" &&
       args.mediaType === "video" &&
       variant === "preview"
@@ -317,7 +347,12 @@ export const getUploadDestination = action({
     // --- S3 presigned POST -------------------------------------------------
     const region = requireEnv("AWS_REGION");
     const bucket = requireEnv("AWS_S3_BUCKET");
-    const objectKey = buildObjectKey(args.mediaType, args.fileName, variant);
+    const objectKey = buildObjectKey(
+      args.mediaType,
+      args.fileName,
+      variant,
+      args.purpose === "hero" ? "site/heroes" : undefined,
+    );
 
     const client = makeS3Client(region);
     const { url, fields } = await createPresignedPost(client, {

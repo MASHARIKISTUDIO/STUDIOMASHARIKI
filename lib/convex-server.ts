@@ -48,6 +48,20 @@ export async function listPublicGalleries(options?: {
   }
 }
 
+export async function getHeroVideos() {
+  if (!convexConfigured()) {
+    return { homeVideoUrl: null, galleryVideoUrl: null };
+  }
+
+  try {
+    return await fetchQuery(api.site.getHeroVideos, {});
+  } catch (error) {
+    unstable_rethrow(error);
+    console.error("[convex] getHeroVideos failed:", error);
+    return { homeVideoUrl: null, galleryVideoUrl: null };
+  }
+}
+
 export async function getGalleryBySlug(slug: string) {
   if (!convexConfigured()) {
     return null;

@@ -355,6 +355,13 @@ export default defineSchema({
     heroImageUrl: v.optional(v.string()),
     heroCtaLabel: v.optional(v.string()),
     heroCtaHref: v.optional(v.string()),
+    /**
+     * Public MP4 or WebM played behind the homepage hero. Optional so rows
+     * written before this field existed stay valid.
+     */
+    homeHeroVideoUrl: v.optional(v.string()),
+    /** Public MP4 or WebM played behind the gallery index hero. */
+    galleryHeroVideoUrl: v.optional(v.string()),
     /** Default price applied to newly uploaded media, in whole shillings. */
     defaultPriceKes: v.optional(v.number()),
     /**

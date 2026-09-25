@@ -8,7 +8,7 @@ import { ServicesGrid } from "@/components/services-grid";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { CATEGORIES } from "@/convex/categories";
-import { listPublicGalleries } from "@/lib/convex-server";
+import { getHeroVideos, listPublicGalleries } from "@/lib/convex-server";
 import {
   categoryItemListSchema,
   jsonLdGraph,
@@ -49,7 +49,10 @@ export const metadata: Metadata = {
 
 export default async function HomePage() {
   // Seven, because that is how many tiles the gallery strip shows.
-  const galleries = await listPublicGalleries({ limit: 7 });
+  const [galleries, heroes] = await Promise.all([
+    listPublicGalleries({ limit: 7 }),
+    getHeroVideos(),
+  ]);
 
   const jsonLd = jsonLdGraph(
     organizationSchema(),
@@ -63,7 +66,7 @@ export default async function HomePage() {
       <SiteHeader />
 
       <main className="flex-1 bg-gray-950">
-        <HomeHero />
+        <HomeHero videoUrl={heroes.homeVideoUrl} />
         <ServicesGrid />
         <AssuranceStrip />
         <GalleryStrip galleries={galleries} />

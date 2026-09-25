@@ -17,6 +17,7 @@ import type * as migrations from "../migrations.js";
 import type * as model_booking from "../model/booking.js";
 import type * as model_users from "../model/users.js";
 import type * as seed from "../seed.js";
+import type * as site from "../site.js";
 import type * as uploads from "../uploads.js";
 import type * as users from "../users.js";
 
@@ -36,6 +37,7 @@ declare const fullApi: ApiFromModules<{
   "model/booking": typeof model_booking;
   "model/users": typeof model_users;
   seed: typeof seed;
+  site: typeof site;
   uploads: typeof uploads;
   users: typeof users;
 }>;

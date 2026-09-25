@@ -67,7 +67,7 @@ function titleFromFileName(fileName: string): string {
  * Uses XHR rather than fetch solely because fetch still cannot report upload
  * progress, and a photographer pushing a 2GB master needs a progress bar.
  */
-function postToS3(
+export function postToS3(
   url: string,
   fields: Record<string, string>,
   blob: Blob,

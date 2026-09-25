@@ -435,6 +435,12 @@ export const setWhatsappNumber = mutation({
       ...(existing.defaultPriceKes !== undefined
         ? { defaultPriceKes: existing.defaultPriceKes }
         : {}),
+      ...(existing.homeHeroVideoUrl !== undefined
+        ? { homeHeroVideoUrl: existing.homeHeroVideoUrl }
+        : {}),
+      ...(existing.galleryHeroVideoUrl !== undefined
+        ? { galleryHeroVideoUrl: existing.galleryHeroVideoUrl }
+        : {}),
       updatedAt: now,
       updatedBy: admin._id,
     });
